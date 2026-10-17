@@ -200,6 +200,43 @@ label.btn input{display:none}
 .cinfo{font:500 12px var(--mono);color:var(--muted)}
 .cinfo b{color:var(--yel);font-weight:700}
 
+/* Inspect screen (осмотр предмета, как в Standoff 2) */
+.card[data-iid],.erow .th[data-iid]{cursor:pointer}
+.card .eye{position:absolute;top:24px;right:8px;z-index:3;width:24px;height:24px;display:grid;place-items:center;padding:0;border:0;background:rgba(6,8,18,.82);color:var(--cyan)}
+.card .eye svg{width:14px;height:14px}
+.card .eye:hover{background:var(--cyan);color:#021017}
+.inspx{position:fixed;inset:0;z-index:40;overflow:hidden;color:var(--fg);
+  background:radial-gradient(1000px 640px at 68% 32%,#15306a 0,transparent 72%),linear-gradient(160deg,#0c1a3d 0,#09112a 45%,#050813 100%)}
+.ix-bg{position:absolute;inset:-30%;pointer-events:none;transform:rotate(-8deg);filter:blur(22px);
+  background:repeating-linear-gradient(100deg,transparent 0 9%,rgba(140,175,255,.07) 9% 15%,transparent 15% 30%)}
+.ix-wm{position:absolute;right:8%;top:12%;width:min(46vmin,420px);opacity:.08;pointer-events:none}
+.ix-stage{position:absolute;inset:0;--S:min(76vw,52vh,640px);display:flex;align-items:center;justify-content:center;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.ix-stage.grab{cursor:grabbing}
+.vglow{position:absolute;left:50%;top:50%;width:calc(var(--S)*1.35);height:calc(var(--S)*1.35);margin:calc(var(--S)*-.675) 0 0 calc(var(--S)*-.675);pointer-events:none;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--rc) 42%,transparent),transparent);animation:vpulse 3.4s ease-in-out infinite}
+@keyframes vpulse{50%{opacity:.6}}
+.vfloor{position:absolute;left:50%;top:calc(50% + var(--S)*.5 + 6px);width:calc(var(--S)*.7);height:calc(var(--S)*.07);margin-left:calc(var(--S)*-.35);pointer-events:none;
+  background:radial-gradient(closest-side,rgba(0,0,0,.7),transparent)}
+.vwrap{position:relative;width:var(--S);height:var(--S);perspective:1400px;--D:calc(var(--S)*.05)}
+.vscene{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
+.pl{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;-webkit-user-drag:none}
+.pl.mid{filter:brightness(.4) saturate(.7)}
+.pl.ft{backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:translateZ(calc(var(--D)*.5))}
+.pl.bk{backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg) translateZ(calc(var(--D)*.5))}
+.ix-head{position:absolute;top:max(16px,env(safe-area-inset-top,0px));left:max(18px,env(safe-area-inset-left,0px));right:max(18px,env(safe-area-inset-right,0px));display:flex;gap:16px;align-items:center;pointer-events:none}
+.ix-em{width:clamp(52px,9vw,88px);flex:none}
+.ix-head h1{margin:0;font:400 clamp(20px,4.2vw,40px)/1.05 var(--display);text-transform:uppercase;overflow-wrap:anywhere;text-wrap:balance}
+.ix-head h1 small{font-size:.55em;color:var(--rc);letter-spacing:.06em;margin-left:.6em;white-space:nowrap}
+.ix-head p{margin:6px 0 0;display:flex;align-items:center;gap:6px;color:#8fa2cf;font:600 clamp(13px,2vw,18px) var(--body)}
+.ix-head p .coin{width:15px;height:15px}
+.vhint{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ix-hint{position:absolute;left:0;right:0;bottom:calc(104px + env(safe-area-inset-bottom,0px));text-align:center;margin:0;pointer-events:none}
+.ix-foot{position:absolute;left:max(18px,env(safe-area-inset-left,0px));right:max(18px,env(safe-area-inset-right,0px));bottom:max(18px,env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;pointer-events:none}
+.ix-foot>*{pointer-events:auto}
+.ixback{font:400 clamp(16px,2.6vw,22px) var(--display);text-transform:uppercase;letter-spacing:.04em;color:var(--fg);background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.42);padding:16px clamp(30px,6vw,64px)}
+.ixback:hover{background:rgba(255,255,255,.14);border-color:#fff}
+.ix-act{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
 @media (max-width:900px){.up{grid-template-columns:minmax(0,1fr)}.ringbox{order:-1}}
 @media (max-width:640px){
   .logo{font-size:24px}
@@ -363,8 +400,11 @@ function crate(r){
 const caseColor=i=>[2,3,4,5,1][i%5];
 function caseIcon(c,i){return c.img?`<img src="${esc(c.img)}" alt="${esc(c.n)}">`:crate(caseColor(i))}
 function card(it,o={}){
+  const insp=!o.mini&&!o.noinsp;
   const cls=['card','r'+it.r,o.mini?'mini':'',o.sel?'sel':'',o.on?'on':'',o.dim?'dim':''].filter(Boolean).join(' ');
-  return `<div class="${cls}" ${o.attrs||''}><div class="in">${o.chance?`<span class="ch">${o.chance}</span>`:''}<div class="art">${art(it)}</div><div class="nm">${esc(it.n)}</div><div class="meta"><span class="rl">${RN[it.r]}</span><span class="pr">${coin()}${fmt(it.p)}</span></div>${o.extra||''}</div></div>`;
+  const iid=insp&&!o.sel?` data-iid="${esc(it.id)}"`:'';
+  const eye=insp&&o.sel?`<button class="eye" type="button" data-iid="${esc(it.id)}" aria-label="Осмотр" title="Осмотр"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M8 3C4.5 3 2 8 2 8s2.5 5 6 5 6-5 6-5-2.5-5-6-5zm0 7.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg></button>`:'';
+  return `<div class="${cls}" ${o.attrs||''}${iid}><div class="in">${eye}${o.chance?`<span class="ch">${o.chance}</span>`:''}<div class="art">${art(it)}</div><div class="nm">${esc(it.n)}</div><div class="meta"><span class="rl">${RN[it.r]}</span><span class="pr">${coin()}${fmt(it.p)}</span></div>${o.extra||''}</div></div>`;
 }
 
 /* ================= Шапка и вкладки ================= */
@@ -396,7 +436,7 @@ function viewInv(){
   const inv=invItems(),total=inv.reduce((s,x)=>s+x.it.p,0);
   const cheap=inv.filter(x=>x.it.r===0);
   const bar=`<div class="bar hud"><div class="line"><b>${inv.length}</b> предметов на <b>${coin()}${fmt(total)}</b></div><div class="grp"><button class="btn pri sm" type="button" data-tab="cases">Открыть кейс</button><button class="btn sm" type="button" data-act="sellcheap" ${cheap.length?'':'disabled'}>Продать все обычные (${cheap.length})</button></div></div>`;
-  const grid=inv.length?`<div class="grid">${inv.map(({u,it})=>card(it,{extra:`<button class="btn sm sell" type="button" data-sell="${u}">Продать за ${fmt(it.p)}</button>`})).join('')}</div>`
+  const grid=inv.length?`<div class="grid">${inv.map(({u,it})=>card(it,{attrs:`data-u="${u}"`,extra:`<button class="btn sm sell" type="button" data-sell="${u}">Продать за ${fmt(it.p)}</button>`})).join('')}</div>`
     :`<div class="empty"><span>Здесь пока пусто. Открой первый кейс, и дроп появится в инвентаре.</span><button class="btn pri" type="button" data-tab="cases">К кейсам</button></div>`;
   return `<h2>Твой инвентарь</h2>`+bar+grid;
 }
@@ -514,13 +554,65 @@ function doContract(){
 }
 
 /* ================= Диалог результата ================= */
-function showRes(o){
-  res=o;
-  const body=o.item?card(o.item):`<div class="empty" style="width:190px">Предмет не получен</div>`;
-  const sellBtn=o.item&&o.sell!=null&&byUid(o.sell)?`<button class="btn" type="button" data-act="rsell">Продать за ${fmt(o.item.p)}</button>`:'';
-  $('#layer').innerHTML=`<div class="ov" data-act="rclose"><div class="dlg" role="dialog" aria-modal="true"><p class="eyebrow ${o.cls||''}">${esc(o.head)}</p>${body}<p>${esc(o.sub||'')}</p><div class="row">${sellBtn}${o.again?'<button class="btn pri" type="button" data-act="ragain">Открыть ещё</button>':''}<button class="btn" type="button" data-act="rclose">Закрыть</button></div></div></div>`;
+const emblem=(c,cls)=>`<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 4 96 50 50 96 4 50z" fill="rgba(10,20,50,.7)" stroke="${c}" stroke-width="5" stroke-linejoin="round"/><path d="M50 14 86 50 50 86 14 50z" fill="none" stroke="${c}" stroke-opacity=".5" stroke-width="2"/><path d="M50 24l5.5 20.5L76 50 55.5 55.5 50 76 44.5 55.5 24 50 44.5 44.5z" fill="${c}"/></svg>`;
+function plEl(it,cls,style,front){
+  const h=art(it),attr=`class="pl ${cls}" style="${style}"`+(front?'':' aria-hidden="true"');
+  return h.indexOf('<img ')===0?h.replace('<img ','<img '+attr+' draggable="false" '):h.replace('<svg ','<svg '+attr+' ');
 }
-function closeRes(){res=null;$('#layer').innerHTML='';render()}
+let VW=null;
+function stopViewer(){if(VW){cancelAnimationFrame(VW.raf);VW=null}}
+function startViewer(){
+  const vp=$('#vp'),sc=$('#vscene');if(!vp||!sc)return;
+  const fl=$('#vfloor');
+  const still=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const v={rx:-6,ry:still?15:-200,vx:0,vy:0,drag:false,lx:0,ly:0,idle:0,raf:0,intro:!still};
+  VW=v;
+  const apply=()=>{
+    sc.style.transform=`rotateX(${v.rx}deg) rotateY(${v.ry}deg)`;
+    fl.style.transform=`scaleX(${(.5+.5*Math.abs(Math.cos(v.ry*Math.PI/180))).toFixed(3)})`;
+  };
+  const tick=()=>{
+    if(VW!==v)return;
+    if(!v.drag){
+      if(v.intro){v.ry+=(15-v.ry)*.07;if(Math.abs(15-v.ry)<.6)v.intro=false}
+      else{
+        v.ry+=v.vy;v.rx+=v.vx;v.vy*=.95;v.vx*=.9;v.idle++;
+        if(!still&&v.idle>90)v.ry+=.3;
+        v.rx+=(-6-v.rx)*.03;
+      }
+    }
+    v.rx=Math.max(-35,Math.min(35,v.rx));
+    apply();
+    v.raf=requestAnimationFrame(tick);
+  };
+  vp.addEventListener('pointerdown',e=>{v.drag=true;v.intro=false;v.idle=0;v.lx=e.clientX;v.ly=e.clientY;v.vx=0;v.vy=0;vp.classList.add('grab');try{vp.setPointerCapture(e.pointerId)}catch(_){}});
+  vp.addEventListener('pointermove',e=>{if(!v.drag)return;const dx=e.clientX-v.lx,dy=e.clientY-v.ly;v.lx=e.clientX;v.ly=e.clientY;v.ry+=dx*.7;v.rx-=dy*.5;v.vy=dx*.7;v.vx=-dy*.5});
+  const end=()=>{v.drag=false;v.idle=0;vp.classList.remove('grab')};
+  vp.addEventListener('pointerup',end);vp.addEventListener('pointercancel',end);
+  apply();v.raf=requestAnimationFrame(tick);
+}
+function openInspect(o){
+  const it=o.item,rc=RC[it.r],N=8;
+  let mid='';
+  for(let i=0;i<N;i++){const z=(-.43+i*(.86/(N-1))).toFixed(3);mid+=plEl(it,'mid',`transform:translateZ(calc(var(--D)*${z}))`,false)}
+  const sellBtn=o.sell!=null&&byUid(o.sell)?`<button class="btn" type="button" data-act="rsell">Продать за ${coin()}${fmt(it.p)}</button>`:'';
+  const again=o.again?'<button class="btn pri" type="button" data-act="ragain">Открыть ещё</button>':'';
+  $('#layer').innerHTML=`<div class="inspx" role="dialog" aria-modal="true" aria-label="${esc(it.n)}" style="--rc:${rc}">
+   <div class="ix-bg"></div>${emblem(rc,'ix-wm')}
+   <div class="ix-stage" id="vp"><div class="vglow"></div><div class="vfloor" id="vfloor"></div>
+    <div class="vwrap"><div class="vscene" id="vscene">${plEl(it,'bk','',false)}${mid}${plEl(it,'ft','',true)}</div></div></div>
+   <div class="ix-head">${emblem(rc,'ix-em')}<div><h1>${esc(it.n)}<small>${esc(RN[it.r])}</small></h1><p>${esc(o.head)} · ${coin()}${fmt(it.p)}</p></div></div>
+   <p class="ix-hint vhint">Крути пальцем или мышью</p>
+   <div class="ix-foot"><button class="ixback" type="button" data-act="rclose">Назад</button><div class="ix-act">${sellBtn}${again}</div></div></div>`;
+  startViewer();
+}
+function showRes(o){
+  stopViewer();
+  res=o;
+  if(o.item){openInspect(o);return}
+  $('#layer').innerHTML=`<div class="ov" data-act="rclose"><div class="dlg" role="dialog" aria-modal="true"><p class="eyebrow ${o.cls||''}">${esc(o.head)}</p><div class="empty" style="width:190px">Предмет не получен</div><p>${esc(o.sub||'')}</p><div class="row"><button class="btn" type="button" data-act="rclose">Закрыть</button></div></div></div>`;
+}
+function closeRes(){stopViewer();res=null;$('#layer').innerHTML='';render()}
 
 /* ================= Приветствие ================= */
 function showWelcome(preview){
@@ -557,7 +649,7 @@ function setWelcome(){
    <div><button type="button" class="btn pri" data-act="wpreview">Показать приветствие</button></div></div>`;
 }
 function setItems(){
-  const rows=CFG.items.map(x=>`<div class="erow hud r${x.r}" ><div class="th">${art(x)}</div>
+  const rows=CFG.items.map(x=>`<div class="erow hud r${x.r}" ><div class="th" data-iid="${esc(x.id)}">${art(x)}</div>
    <div class="ef"><input class="in-name" data-sec="items" data-id="${esc(x.id)}" data-f="n" value="${esc(x.n)}" maxlength="60" placeholder="Название">
    <select data-sec="items" data-id="${esc(x.id)}" data-f="r">${RN.map((n,r)=>`<option value="${r}" ${x.r===r?'selected':''}>${n} · ${RE[r]}</option>`).join('')}</select>
    <input type="number" min="1" step="1" data-sec="items" data-id="${esc(x.id)}" data-f="p" value="${x.p}" placeholder="Цена"></div>
@@ -749,7 +841,7 @@ function render(){
 }
 function toggle(set,u,max){if(set.has(u))set.delete(u);else if(!max||set.size<max)set.add(u)}
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-tab],[data-case],[data-up],[data-target],[data-ct],[data-sell],[data-act],[data-sub],[data-pool],[data-poolall],[data-del],[data-noimg],[data-wel]');
+  const t=e.target.closest('[data-tab],[data-case],[data-up],[data-target],[data-ct],[data-sell],[data-act],[data-sub],[data-pool],[data-poolall],[data-del],[data-noimg],[data-wel],[data-iid]');
   if(!t)return;
   const d=t.dataset;
   if(d.wel){$('#welLayer').innerHTML='';ls.set(K_SEEN,'1');if(d.wel==='go')claimStart();render();return}
@@ -763,6 +855,7 @@ document.addEventListener('click',e=>{
   if(d.target){upTarget=upTarget===d.target?null:d.target;render();return}
   if(d.ct){toggle(ctSel,+d.ct,10);render();return}
   if(d.sell){sell(+d.sell);return}
+  if(d.iid){const it=IDX[d.iid];if(it){const h=t.closest('[data-u]');showRes({head:'Осмотр',item:it,sell:h?+h.dataset.u:null})}return}
   if(d.sub){sub=d.sub;render();return}
   if(d.noimg){const [sec,id]=d.noimg.split(':');const o=CFG[sec].find(x=>x.id===id);if(o){o.img='';saveCfg();render()}return}
   if(d.poolall){const c=CFG.cases.find(x=>x.id===d.poolall);if(c){c.pool=[];saveCfg();render()}return}
@@ -794,6 +887,8 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{
   if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.sel')){e.preventDefault();e.target.click()}
   if(e.key==='Escape'&&res)closeRes();
+  if(res&&VW){const k=e.key;VW.intro=false;VW.idle=0;
+    if(k==='ArrowLeft')VW.vy-=7;else if(k==='ArrowRight')VW.vy+=7;else if(k==='ArrowUp')VW.vx+=5;else if(k==='ArrowDown')VW.vx-=5}
 });
 
 /* ================= Старт ================= */
